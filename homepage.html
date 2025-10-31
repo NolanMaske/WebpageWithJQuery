@@ -1,32 +1,202 @@
+<!-- Nolan Maske -->
+<!--COMP 322 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assignment 5 - jQuery Events and Effects</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="script.js" defer></script>
-</head>
-<body>
-  <h1>Favorite Website Icons</h1>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Assignment 5 – jQuery Events & Effects</title>
 
-  <div id="info">
-    <p id="inText">In: </p>
-    <p id="outText">Out: </p>
-    <p id="coords">Mouse X: , Y: </p>
+<!-- Google Font for a cleaner look -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- jQuery CDN (required for all jQuery features) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+  /*BASIC PAGE STYLING*/
+  :root { --card:#ffffff; --text:#0f172a; --muted:#475569; --ring:#e2e8f0; }
+  * { box-sizing:border-box; }
+
+  body {
+    margin:0;
+    padding:40px 16px;
+    background:#f8fafc;
+    color:var(--text);
+    font-family:Inter,system-ui,Arial,sans-serif;
+  }
+
+  .wrap { max-width:960px; margin:0 auto; }
+
+  h1 {
+    font-weight:700;
+    letter-spacing:.2px;
+    margin:0 0 16px;
+  }
+
+  /*INFO CARD*/
+  .card {
+    background:var(--card);
+    border:1px solid var(--ring);
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 10px 30px rgba(15,23,42,.06);
+  }
+
+  /* Row containing “In”, “Out”, and coordinates */
+  .info {
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+    font-size:15px;
+  }
+
+  .pill {
+    background:#f1f5f9;
+    border:1px solid var(--ring);
+    padding:10px 12px;
+    border-radius:12px;
+    min-width:220px;
+  }
+
+  /*ICON GRID*/
+  #iconContainer {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+    gap:18px;
+    align-items:center;
+  }
+
+  /* Individual icon styling */
+  .ico {
+    height:100px;
+    width:100px;
+    object-fit:contain;
+    background:#fff;
+    border:1px solid var(--ring);
+    border-radius:16px;
+    padding:14px;
+    transition:transform .18s ease, box-shadow .18s ease, opacity .2s ease;
+    cursor:pointer;
+    user-select:none;
+  }
+
+  /* Hover lift effect for visual polish */
+  .ico:hover {
+    transform:translateY(-2px) scale(1.03);
+    box-shadow:0 8px 24px rgba(15,23,42,.08);
+  }
+
+  /*ENLARGED PREVIEW BUBBLE*/
+  #enlarged {
+    position:fixed;
+    display:none;
+    pointer-events:none; /* prevents bubble from capturing the mouse */
+    z-index:9999;
+    transform:translate(12px,12px);
+    filter:drop-shadow(0 8px 24px rgba(15,23,42,.25));
+  }
+  #enlarged img {
+    height:160px;
+    background:#fff;
+    border:1px solid var(--ring);
+    border-radius:18px;
+    padding:14px;
+  }
+
+  footer { margin-top:14px; color:var(--muted); font-size:13px; }
+</style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Favorite Website Icons</h1>
+
+    <div class="card">
+      <!--Info text area>
+      <div class="info">
+        <div class="pill" id="inText">In:</div>
+        <div class="pill" id="outText">Out:</div>
+        <div class="pill" id="coords">Mouse X:, Y:</div>
+      </div>
+
+      <!--Span Container -->
+      <span id="iconContainer">
+        <!-- If your local images fail to load, Clearbit provides a live fallback -->
+        <img class="ico" alt="Facebook" data-url="https://facebook.com"
+             src="facebook.png"  onerror="this.src='https://logo.clearbit.com/facebook.com'">
+        <img class="ico" alt="Twitter/X" data-url="https://twitter.com"
+             src="twitter.png"   onerror="this.src='https://logo.clearbit.com/x.com'">
+        <img class="ico" alt="Instagram" data-url="https://instagram.com"
+             src="instagram.png" onerror="this.src='https://logo.clearbit.com/instagram.com'">
+        <img class="ico" alt="YouTube" data-url="https://youtube.com"
+             src="youtube.png"   onerror="this.src='https://logo.clearbit.com/youtube.com'">
+        <img class="ico" alt="LinkedIn" data-url="https://linkedin.com"
+             src="linkedin.png"  onerror="this.src='https://logo.clearbit.com/linkedin.com'">
+        <img class="ico" alt="GitHub" data-url="https://github.com"
+             src="github.png"    onerror="this.src='https://logo.clearbit.com/github.com'">
+      </span>
+
+      <!--Container used to temporarily display enlarged preview-->
+      <div id="enlarged"></div>
+
+      <footer>Tip → Click = preview | Double-click = open website</footer>
+    </div>
   </div>
 
-  <span id="iconContainer">
-    <img src="facebook.png" alt="Facebook" data-url="https://www.facebook.com">
-    <img src="twitter.png" alt="Twitter" data-url="https://www.twitter.com">
-    <img src="instagram.png" alt="Instagram" data-url="https://www.instagram.com">
-    <img src="youtube.png" alt="YouTube" data-url="https://www.youtube.com">
-    <img src="linkedin.png" alt="LinkedIn" data-url="https://www.linkedin.com">
-    <img src="github.png" alt="GitHub" data-url="https://www.github.com">
-  </span>
+<!--jQuery script-->
+<script>
+$(function () {
 
-  <div id="enlarged"></div>
+  //Cache frequently used elements for efficiency
+  const $in = $("#inText"),
+        $out = $("#outText"),
+        $coords = $("#coords"),
+        $bubble = $("#enlarged");
+
+  /*Mousemove on Span
+     Updates the X,Y text and keeps preview following cursor*/
+  $("#iconContainer").on("mousemove", function(e){
+    $coords.text(`Mouse X: ${e.pageX}, Y: ${e.pageY}`);
+    if ($bubble.is(":visible")) $bubble.css({left:e.clientX, top:e.clientY});
+  });
+
+  /*ICON EVENTS
+     Uses jQuery’s delegated event binding for all .ico elements*/
+  $("#iconContainer").on({
+    /*a. mouseenter → show which icon is entered & reduce opacity*/
+    mouseenter: function(){
+      const name = $(this).attr("alt");
+      $in.text(`In: ${name}`);
+      $(this).css("opacity", 0.5);
+    },
+
+    /*b. mouseleave → show which icon is left & restore opacity*/
+    mouseleave: function(){
+      const name = $(this).attr("alt");
+      $out.text(`Out: ${name}`);
+      $(this).css("opacity", 1.0);
+    },
+
+    /*c. click → show enlarged preview near cursor*/
+    click: function(e){
+      const src = $(this).attr("src");
+      $bubble.html(`<img src="${src}" alt="Enlarged">`)
+             .css({left:e.clientX, top:e.clientY})
+             .stop(true,true)           // stop any ongoing animations
+             .fadeIn(120)               // quick fade-in
+             .delay(900)                // stay visible for 0.9 s
+             .fadeOut(200);             // fade-out
+    },
+
+    /*d. dblclick → open corresponding website in a new tab*/
+    dblclick: function(){
+      const url = $(this).data("url");
+      window.open(url,"_blank");
+    }
+
+  },"img.ico"); // Event delegation selector
+});
+</script>
 </body>
 </html>
-
